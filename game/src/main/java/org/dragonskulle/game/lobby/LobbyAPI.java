@@ -116,18 +116,23 @@ public class LobbyAPI {
                     writer.close();
                 }
 
-                BufferedReader reader =
-                        new BufferedReader(new InputStreamReader(con.getInputStream()));
-                String line;
-                StringBuilder builder = new StringBuilder();
-                while ((line = reader.readLine()) != null) {
-                    builder.append(line);
-                }
-                reader.close();
+                if (con.getResponseCode() != HttpURLConnection.HTTP_OK) {
+                    log.info(String.valueOf(con.getResponseCode()));
+                    log.info(con.getResponseMessage());
+                } else {
+                    BufferedReader reader =
+                            new BufferedReader(new InputStreamReader(con.getInputStream()));
+                    String line;
+                    StringBuilder builder = new StringBuilder();
+                    while ((line = reader.readLine()) != null) {
+                        builder.append(line);
+                    }
+                    reader.close();
 
-                if (mCallback != null) {
-                    boolean success = con.getResponseCode() == HttpURLConnection.HTTP_OK;
-                    mCallback.call(builder.toString(), success);
+                    if (mCallback != null) {
+                        boolean success = con.getResponseCode() == HttpURLConnection.HTTP_OK;
+                        mCallback.call(builder.toString(), success);
+                    }
                 }
             } catch (IOException e) {
                 log.warning(String.format("%s request to %s failed", mMethod, mUrl.toString()));
